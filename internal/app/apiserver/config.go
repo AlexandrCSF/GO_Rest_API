@@ -1,6 +1,6 @@
 package apiserver
 
-import "awesomeProject/internal/app/store"
+import "wb_cource/internal/app/store"
 
 type Config struct {
 	BindAddr string `toml:"bind_addr"`

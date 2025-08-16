@@ -1,10 +1,10 @@
 package main
 
 import (
-	"awesomeProject/internal/app/apiserver"
 	"flag"
 	"github.com/BurntSushi/toml"
 	"log"
+	"wb_cource/internal/app/apiserver"
 )
 
 var (

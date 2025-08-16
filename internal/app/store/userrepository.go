@@ -1,6 +1,6 @@
 package store
 
-import "awesomeProject/internal/app/model"
+import "wb_cource/internal/app/model"
 
 type UserRepository struct {
 	store *Store

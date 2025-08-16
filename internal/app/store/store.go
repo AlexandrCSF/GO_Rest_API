@@ -18,7 +18,7 @@ func New(config *Config) *Store {
 }
 
 func (store *Store) Open() error {
-	db, err := sql.Open("sqlite3", "restapi_dev")
+	db, err := sql.Open("sqlite3", "restapi_dev.db")
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-module awesomeProject
+module wb_cource
 
 go 1.23
 

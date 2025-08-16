@@ -1,11 +1,11 @@
 package apiserver
 
 import (
-	"awesomeProject/internal/app/store"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"wb_cource/internal/app/store"
 )
 
 type APIServer struct {
