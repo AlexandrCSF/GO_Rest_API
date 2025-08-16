@@ -30,7 +30,10 @@ func (store *Store) Open() error {
 }
 
 func (store *Store) Close() {
-	store.db.Close()
+	err := store.db.Close()
+	if err != nil {
+		return
+	}
 }
 
 func (s *Store) User() *UserRepository {
