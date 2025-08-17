@@ -1,6 +1,8 @@
 package store
 
-import "wb_cource/internal/app/model"
+import (
+	"wb_cource/internal/app/model"
+)
 
 type UserRepository struct {
 	store *Store
@@ -23,8 +25,17 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 		"SELECT id,email FROM users if email=$1",
 		email).Scan(
 		&u.ID,
-		&u.Email,
-		&u.EncryptedPassword); err != nil {
+		&u.Email); err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+func (r *UserRepository) FindByID(id int) (*model.User, error) {
+	u := &model.User{}
+	if err := r.store.db.QueryRow("SELECT id,email FROM users if id=$1",
+		id).Scan(&u.ID,
+		&u.Email); err != nil {
 		return nil, err
 	}
 	return u, nil

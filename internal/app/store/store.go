@@ -2,7 +2,7 @@ package store
 
 import (
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 type Store struct {
@@ -18,7 +18,7 @@ func New(config *Config) *Store {
 }
 
 func (store *Store) Open() error {
-	db, err := sql.Open("sqlite3", "restapi_dev.db")
+	db, err := sql.Open("postgres", store.config.DataBaseURL)
 	if err != nil {
 		return err
 	}
