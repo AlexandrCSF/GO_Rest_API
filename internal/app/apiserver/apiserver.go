@@ -5,14 +5,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
-	"wb_cource/internal/app/store"
+	"wb_cource/internal/app/store/sqlstore"
 )
 
 type APIServer struct {
 	config *Config
 	logger *logrus.Logger
 	router *mux.Router
-	store  *store.Store
+	store  *sqlstore.Store
 }
 
 func New(config *Config) *APIServer {
@@ -49,7 +49,7 @@ func (apiServer *APIServer) configureRouter() {
 	apiServer.router.HandleFunc("/hello", apiServer.handleHello())
 }
 func (apiServer *APIServer) configureStore() error {
-	st := store.New(apiServer.config.Store)
+	st := sqlstore.New(apiServer.config.Store)
 	if err := st.Open(); err != nil {
 		return err
 	}
