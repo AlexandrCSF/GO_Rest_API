@@ -1,17 +1,15 @@
 package apiserver
 
-import "wb_cource/internal/app/store"
-
 type Config struct {
-	BindAddr string `toml:"bind_addr"`
-	LogLevel string `toml:"log_level"`
-	Store    *store.Config
+	BindAddr    string `toml:"bind_addr"`
+	LogLevel    string `toml:"log_level"`
+	DatabaseURL string `toml:"database_url"`
 }
 
 func NewConfig() *Config {
 	return &Config{
-		BindAddr: ":8080",
-		LogLevel: "debug",
-		Store:    store.NewConfig(),
+		BindAddr:    ":8080",
+		LogLevel:    "debug",
+		DatabaseURL: "host=localhost dbname=restapi_dev sslmode=disable user=postgres password=postgres",
 	}
 }

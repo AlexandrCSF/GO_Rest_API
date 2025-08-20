@@ -8,12 +8,13 @@ import (
 
 type Store struct {
 	db             *sql.DB
+	databaseURL    string
 	userRepository store.UserRepository
 }
 
-func New(db *sql.DB) *Store {
+func New(databaseURL string) *Store {
 	return &Store{
-		db: db,
+		databaseURL: databaseURL,
 	}
 }
 
@@ -27,4 +28,25 @@ func (s *Store) User() store.UserRepository {
 	}
 
 	return s.userRepository
+}
+
+func (s *Store) Open() error {
+	db, err := sql.Open("postgres", s.databaseURL)
+	if err != nil {
+		return err
+	}
+
+	if err := db.Ping(); err != nil {
+		return err
+	}
+
+	s.db = db
+	return nil
+}
+
+func (s *Store) Close() error {
+	if s.db != nil {
+		return s.db.Close()
+	}
+	return nil
 }
