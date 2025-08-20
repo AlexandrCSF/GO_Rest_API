@@ -2,7 +2,7 @@ package model
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
-	
+	"time"
 )
 
 type Order struct {
