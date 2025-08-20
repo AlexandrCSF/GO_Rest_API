@@ -10,24 +10,15 @@ import (
 type OrderHandler struct {
 	store store.Store
 	cache *store.Cache
-	log   Logger
+	log   *ServerLogger
 }
 
-type Logger interface {
-	WithField(key string, value interface{}) *Entry
-	WithError(err error) *Entry
-	Info(msg string)
-	Warn(msg string)
-	Error(msg string)
-}
+// ServerLogger — тонкая обёртка, чтобы не тянуть logrus напрямую в хэндлер
+type ServerLogger struct{ s *Server }
 
-type Entry interface {
-	WithField(key string, value interface{}) *Entry
-	WithError(err error) *Entry
-	Info(msg string)
-	Warn(msg string)
-	Error(msg string)
-}
+func (l *ServerLogger) Error(msg string) { l.s.logger.Error(msg) }
+func (l *ServerLogger) Warn(msg string)  { l.s.logger.Warn(msg) }
+func (l *ServerLogger) Info(msg string)  { l.s.logger.Info(msg) }
 
 func NewOrderHandler(store store.Store, cache *store.Cache) *OrderHandler {
 	return &OrderHandler{

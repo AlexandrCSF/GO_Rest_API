@@ -20,22 +20,20 @@ func (r *OrderRepository) Create(o *model.Order) error {
 	}
 	defer tx.Rollback()
 
-	// Вставляем основной заказ
-	err = tx.QueryRow(
+	_, err = tx.Exec(
 		`INSERT INTO orders (
-			order_uid, track_number, entry, locale, internal_signature, 
+			order_uid, track_number, entry, locale, internal_signature,
 			customer_id, delivery_service, shard_key, sm_id, date_created, oof_shard
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 		o.OrderUID, o.TrackNumber, o.Entry, o.Locale, o.InternalSignature,
 		o.CustomerID, o.DeliveryService, o.ShardKey, o.SmID, o.DateCreated, o.OofShard,
-	).Scan(&o.OrderUID)
+	)
 	if err != nil {
 		return err
 	}
 
-	// deliveryJSON, _ := json.Marshal(o.Delivery)
 	_, err = tx.Exec(
-		`INSERT INTO deliveries (order_uid, name, phone, zip, city, address, region, email) 
+		`INSERT INTO deliveries (order_uid, name, phone, zip, city, address, region, email)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		o.OrderUID, o.Delivery.Name, o.Delivery.Phone, o.Delivery.Zip,
 		o.Delivery.City, o.Delivery.Address, o.Delivery.Region, o.Delivery.Email,
@@ -44,10 +42,9 @@ func (r *OrderRepository) Create(o *model.Order) error {
 		return err
 	}
 
-	// Вставляем payment
 	_, err = tx.Exec(
 		`INSERT INTO payments (
-			order_uid, transaction, request_id, currency, provider, amount, 
+			order_uid, transaction, request_id, currency, provider, amount,
 			payment_dt, bank, delivery_cost, goods_total, custom_fee
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 		o.OrderUID, o.Payment.Transaction, o.Payment.RequestID, o.Payment.Currency,
@@ -58,11 +55,10 @@ func (r *OrderRepository) Create(o *model.Order) error {
 		return err
 	}
 
-	// Вставляем items
 	for _, item := range o.Items {
 		_, err = tx.Exec(
 			`INSERT INTO items (
-				order_uid, chrt_id, track_number, price, rid, name, sale, 
+				order_uid, chrt_id, track_number, price, rid, name, sale,
 				size, total_price, nm_id, brand, status
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
 			o.OrderUID, item.ChrtID, item.TrackNumber, item.Price, item.Rid,
@@ -79,10 +75,9 @@ func (r *OrderRepository) Create(o *model.Order) error {
 func (r *OrderRepository) FindByID(orderUID string) (*model.Order, error) {
 	o := &model.Order{}
 
-	// Получаем основной заказ
 	err := r.store.db.QueryRow(
-		`SELECT order_uid, track_number, entry, locale, internal_signature, 
-		 customer_id, delivery_service, shard_key, sm_id, date_created, oof_shard 
+		`SELECT order_uid, track_number, entry, locale, internal_signature,
+		 customer_id, delivery_service, shard_key, sm_id, date_created, oof_shard
 		 FROM orders WHERE order_uid = $1`,
 		orderUID,
 	).Scan(
@@ -96,9 +91,8 @@ func (r *OrderRepository) FindByID(orderUID string) (*model.Order, error) {
 		return nil, err
 	}
 
-	// Получаем delivery
 	err = r.store.db.QueryRow(
-		`SELECT name, phone, zip, city, address, region, email 
+		`SELECT name, phone, zip, city, address, region, email
 		 FROM deliveries WHERE order_uid = $1`,
 		orderUID,
 	).Scan(
@@ -109,10 +103,9 @@ func (r *OrderRepository) FindByID(orderUID string) (*model.Order, error) {
 		return nil, err
 	}
 
-	// Получаем payment
 	err = r.store.db.QueryRow(
-		`SELECT transaction, request_id, currency, provider, amount, 
-		 payment_dt, bank, delivery_cost, goods_total, custom_fee 
+		`SELECT transaction, request_id, currency, provider, amount,
+		 payment_dt, bank, delivery_cost, goods_total, custom_fee
 		 FROM payments WHERE order_uid = $1`,
 		orderUID,
 	).Scan(
@@ -124,10 +117,9 @@ func (r *OrderRepository) FindByID(orderUID string) (*model.Order, error) {
 		return nil, err
 	}
 
-	// Получаем items
 	rows, err := r.store.db.Query(
-		`SELECT chrt_id, track_number, price, rid, name, sale, 
-		 size, total_price, nm_id, brand, status 
+		`SELECT chrt_id, track_number, price, rid, name, sale,
+		 size, total_price, nm_id, brand, status
 		 FROM items WHERE order_uid = $1`,
 		orderUID,
 	)
@@ -164,13 +156,11 @@ func (r *OrderRepository) GetAll() ([]*model.Order, error) {
 		if err := rows.Scan(&orderUID); err != nil {
 			return nil, err
 		}
-
 		order, err := r.FindByID(orderUID)
 		if err != nil {
 			return nil, err
 		}
 		orders = append(orders, order)
 	}
-
 	return orders, nil
 }
