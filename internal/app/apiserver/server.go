@@ -1,9 +1,12 @@
 package apiserver
 
 import (
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"net/http"
 	"wb_cource/internal/app/store"
 )
 
@@ -16,35 +19,66 @@ type Server struct {
 }
 
 func newServer(st store.Store) *Server {
+	logger := logrus.New()
+	logger.SetOutput(os.Stdout)
+	logger.SetFormatter(&logrus.JSONFormatter{})
+
 	cache := store.NewCache()
 
 	s := &Server{
 		router:       mux.NewRouter(),
-		logger:       logrus.New(),
+		logger:       logger,
 		store:        st,
 		cache:        cache,
 		orderHandler: NewOrderHandler(st, cache),
 	}
 
-	// Загружаем данные в кэш при старте
 	if err := cache.LoadFromStore(st); err != nil {
-		s.logger.Warn("Failed to load cache from store:", err)
+		s.logger.WithError(err).Warn("cache_warmup_failed")
 	}
 
 	s.configureRouter()
 	return s
 }
 
-func (s *Server) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	s.router.ServeHTTP(writer, request)
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.router.ServeHTTP(w, r)
 }
 
 func (s *Server) configureRouter() {
-	// API endpoints
+	s.router.Use(s.accessLogMiddleware)
+
 	s.router.HandleFunc("/order", s.orderHandler.GetOrderByID).Methods("GET")
 	s.router.HandleFunc("/orders", s.orderHandler.GetAllOrders).Methods("GET")
 	s.router.HandleFunc("/order", s.orderHandler.CreateOrder).Methods("POST")
 
-	// Serve static files for web interface
 	s.router.PathPrefix("/").Handler(http.FileServer(http.Dir("static/")))
+}
+
+type statusRecorder struct {
+	http.ResponseWriter
+	status int
+}
+
+func (r *statusRecorder) WriteHeader(code int) {
+	r.status = code
+	r.ResponseWriter.WriteHeader(code)
+}
+
+func (s *Server) accessLogMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
+		next.ServeHTTP(rec, r)
+		dur := time.Since(start)
+
+		s.logger.WithFields(logrus.Fields{
+			"method":      r.Method,
+			"path":        r.URL.Path,
+			"status":      rec.status,
+			"duration_ms": dur.Milliseconds(),
+			"remote_addr": r.RemoteAddr,
+			"user_agent":  r.UserAgent(),
+		}).Info("http_request")
+	})
 }
