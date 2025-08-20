@@ -7,9 +7,10 @@ import (
 )
 
 type Store struct {
-	db             *sql.DB
-	databaseURL    string
-	userRepository store.UserRepository
+	db              *sql.DB
+	databaseURL     string
+	userRepository  store.UserRepository
+	orderRepository store.OrderRepository
 }
 
 func New(databaseURL string) *Store {
@@ -28,6 +29,18 @@ func (s *Store) User() store.UserRepository {
 	}
 
 	return s.userRepository
+}
+
+func (s *Store) Order() store.OrderRepository {
+	if s.orderRepository != nil {
+		return s.orderRepository
+	}
+
+	s.orderRepository = &OrderRepository{
+		store: s,
+	}
+
+	return s.orderRepository
 }
 
 func (s *Store) Open() error {

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск заказов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            display: none;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .order-info {
+            margin-bottom: 20px;
+        }
+        .order-info h3 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .field {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .field-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .field-value {
+            color: #333;
+        }
+        .items {
+            margin-top: 15px;
+        }
+        .item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Поиск заказов</h1>
+        
+        <div class="search-form">
+            <input type="text" id="orderId" placeholder="Введите ID заказа..." />
+            <button onclick="searchOrder()">Найти</button>
+        </div>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        async function searchOrder() {
+            const orderId = document.getElementById('orderId').value.trim();
+            if (!orderId) {
+                alert('Пожалуйста, введите ID заказа');
+                return;
+            }
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Поиск...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`/order?order_uid=${encodeURIComponent(orderId)}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayOrder(data);
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Ошибка: ${data.message || 'Заказ не найден'}</div>`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Ошибка сети: ${error.message}</div>`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        function displayOrder(order) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result';
+            
+            resultDiv.innerHTML = `
+                <div class="order-info">
+                    <h3>📦 Заказ ${order.order_uid}</h3>
+                    <div class="field">
+                        <span class="field-label">Трек номер:</span>
+                        <span class="field-value">${order.track_number}</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Дата создания:</span>
+                        <span class="field-value">${new Date(order.date_created).toLocaleString('ru-RU')}</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Клиент:</span>
+                        <span class="field-value">${order.customer_id}</span>
+                    </div>
+                </div>
+
+                <div class="order-info">
+                    <h3>🚚 Доставка</h3>
+                    <div class="field">
+                        <span class="field-label">Имя:</span>
+                        <span class="field-value">${order.delivery.name}</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Телефон:</span>
+                        <span class="field-value">${order.delivery.phone}</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Город:</span>
+                        <span class="field-value">${order.delivery.city}</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Адрес:</span>
+                        <span class="field-value">${order.delivery.address}</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Email:</span>
+                        <span class="field-value">${order.delivery.email}</span>
+                    </div>
+                </div>
+
+                <div class="order-info">
+                    <h3>💳 Оплата</h3>
+                    <div class="field">
+                        <span class="field-label">Сумма:</span>
+                        <span class="field-value">${order.payment.amount} ${order.payment.currency}</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Провайдер:</span>
+                        <span class="field-value">${order.payment.provider}</span>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Банк:</span>
+                        <span class="field-value">${order.payment.bank}</span>
+                    </div>
+                </div>
+
+                <div class="order-info">
+                    <h3>🛍️ Товары (${order.items.length})</h3>
+                    <div class="items">
+                        ${order.items.map(item => `
+                            <div class="item">
+                                <div class="field">
+                                    <span class="field-label">Название:</span>
+                                    <span class="field-value">${item.name}</span>
+                                </div>
+                                <div class="field">
+                                    <span class="field-label">Бренд:</span>
+                                    <span class="field-value">${item.brand}</span>
+                                </div>
+                                <div class="field">
+                                    <span class="field-label">Цена:</span>
+                                    <span class="field-value">${item.price}</span>
+                                </div>
+                                <div class="field">
+                                    <span class="field-label">Скидка:</span>
+                                    <span class="field-value">${item.sale}%</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Поиск по Enter
+        document.getElementById('orderId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchOrder();
+            }
+        });
+    </script>
+</body>
+</html>
