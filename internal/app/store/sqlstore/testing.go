@@ -1,26 +1,23 @@
 package sqlstore
 
 import (
-	"database/sql"
 	"fmt"
 	"strings"
 	"testing"
 )
 
-func TestDB(t *testing.T, databaseURL string) (*sql.DB, func(...string)) {
+func TestDB(t *testing.T, databaseURL string) (*Store, func(...string)) {
 	t.Helper()
-	db, err := sql.Open("postgres", databaseURL)
-	if err != nil {
+	store := New(databaseURL)
+	if err := store.Open(); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.Ping(); err != nil {
-		t.Fatal(err)
-	}
-	return db, func(tables ...string) {
+
+	return store, func(tables ...string) {
 		if len(tables) > 0 {
-			db.Exec(fmt.Sprintf("TRUNCATE %s CASCADE", strings.Join(tables, ", ")))
+			store.db.Exec(fmt.Sprintf("TRUNCATE %s CASCADE", strings.Join(tables, ", ")))
 		}
-		err := db.Close()
+		err := store.Close()
 		if err != nil {
 			return
 		}
