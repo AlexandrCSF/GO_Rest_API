@@ -1,6 +1,7 @@
 package store
 
 import (
+	"log"
 	"sync"
 	"wb_cource/internal/app/model"
 )
@@ -26,6 +27,9 @@ func (c *Cache) Get(orderUID string) (*model.Order, bool) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	order, exists := c.orders[orderUID]
+	if exists {
+		log.Printf("Значение для orderUID %s взято из кеша", orderUID)
+	}
 	return order, exists
 }
 
