@@ -1,4 +1,3 @@
--- Создание таблицы заказов
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     order_uid VARCHAR(255) UNIQUE NOT NULL,
@@ -14,7 +13,6 @@ CREATE TABLE IF NOT EXISTS orders (
     oof_shard VARCHAR(10)
 );
 
--- Создание таблицы доставки
 CREATE TABLE IF NOT EXISTS deliveries (
     id SERIAL PRIMARY KEY,
     order_uid VARCHAR(255) NOT NULL REFERENCES orders(order_uid) ON DELETE CASCADE,
@@ -28,7 +26,6 @@ CREATE TABLE IF NOT EXISTS deliveries (
     UNIQUE(order_uid)
 );
 
--- Создание таблицы платежей
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
     order_uid VARCHAR(255) NOT NULL REFERENCES orders(order_uid) ON DELETE CASCADE,
@@ -45,7 +42,6 @@ CREATE TABLE IF NOT EXISTS payments (
     UNIQUE(order_uid)
 );
 
--- Создание таблицы товаров
 CREATE TABLE IF NOT EXISTS items (
     id SERIAL PRIMARY KEY,
     order_uid VARCHAR(255) NOT NULL REFERENCES orders(order_uid) ON DELETE CASCADE,
@@ -62,7 +58,6 @@ CREATE TABLE IF NOT EXISTS items (
     status INTEGER
 );
 
--- Создание индексов для ускорения поиска
 CREATE INDEX IF NOT EXISTS idx_orders_order_uid ON orders(order_uid);
 CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);
 CREATE INDEX IF NOT EXISTS idx_deliveries_order_uid ON deliveries(order_uid);

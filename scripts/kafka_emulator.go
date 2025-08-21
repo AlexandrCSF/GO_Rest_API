@@ -11,14 +11,12 @@ import (
 )
 
 func main() {
-	// Тестовые заказы
 	orders := []*model.Order{
 		createTestOrder("order1", "Test User 1"),
 		createTestOrder("order2", "Test User 2"),
 		createTestOrder("order3", "Test User 3"),
 	}
 
-	// Отправляем заказы
 	for i, order := range orders {
 		fmt.Printf("Отправка заказа %d: %s\n", i+1, order.OrderUID)
 

@@ -13,7 +13,6 @@ type OrderHandler struct {
 	log   *ServerLogger
 }
 
-// ServerLogger — тонкая обёртка, чтобы не тянуть logrus напрямую в хэндлер
 type ServerLogger struct{ s *Server }
 
 func (l *ServerLogger) Error(msg string) { l.s.logger.Error(msg) }
