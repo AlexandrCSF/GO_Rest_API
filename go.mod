@@ -5,7 +5,6 @@ go 1.25.0
 require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
-	github.com/gopherschool/http-rest-api v0.0.0-20190922093049-d59926c5ce3c
 	github.com/gorilla/mux v1.8.1
 	github.com/lib/pq v1.10.9
 	github.com/sirupsen/logrus v1.9.3
