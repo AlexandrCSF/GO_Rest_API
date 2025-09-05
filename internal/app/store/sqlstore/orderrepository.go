@@ -18,7 +18,12 @@ func (r *OrderRepository) Create(o *model.Order) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func(tx *sql.Tx) {
+		err := tx.Rollback()
+		if err != nil {
+
+		}
+	}(tx)
 
 	_, err = tx.Exec(
 		`INSERT INTO orders (
@@ -126,7 +131,12 @@ func (r *OrderRepository) FindByID(orderUID string) (*model.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 
 	for rows.Next() {
 		item := model.Item{}
@@ -152,7 +162,12 @@ func (r *OrderRepository) GetAll() ([]*model.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 
 	var orders []*model.Order
 	for rows.Next() {
