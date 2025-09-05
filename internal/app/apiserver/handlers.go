@@ -72,7 +72,11 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 func (h *OrderHandler) respondJSON(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	_ = json.NewEncoder(w).Encode(data)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		if h.log != nil {
+			h.log.Error("json_encode_failed")
+		}
+	}
 }
 
 func (h *OrderHandler) respondError(w http.ResponseWriter, code int, msg string) {

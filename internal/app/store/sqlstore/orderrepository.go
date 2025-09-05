@@ -140,6 +140,10 @@ func (r *OrderRepository) FindByID(orderUID string) (*model.Order, error) {
 		o.Items = append(o.Items, item)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return o, nil
 }
 
@@ -162,5 +166,10 @@ func (r *OrderRepository) GetAll() ([]*model.Order, error) {
 		}
 		orders = append(orders, order)
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return orders, nil
 }
