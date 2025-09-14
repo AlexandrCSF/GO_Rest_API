@@ -1,16 +1,6 @@
-services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres
-    environment:
-      POSTGRES_DB: restapi_dev
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+version: '3.8'
 
+services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     hostname: zookeeper
@@ -48,26 +38,8 @@ services:
     depends_on:
       - kafka
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-
-  app:
-    build: .
-    container_name: wb-api
-    depends_on:
-      - postgres
-      - kafka
-    ports:
-      - "8080:8080"
-    environment:
-      - DATABASE_URL=host=postgres dbname=restapi_dev sslmode=disable user=postgres password=postgres
-      - KAFKA_BROKERS=kafka:29092
-    volumes:
-      - ./configs:/root/configs
-    restart: unless-stopped
-
-volumes:
-  postgres_data:
