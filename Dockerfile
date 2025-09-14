@@ -16,7 +16,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=1 go build -o apiserver ./cmd/apiserver
+RUN go build -o apiserver.exe ./cmd/apiserver.exe
 
 FROM alpine:latest
 

@@ -18,22 +18,22 @@ func main() {
 	}
 	defer producer.Close()
 
-	log.Println("🚀 Kafka Producer эмулятор запущен")
+	log.Println("Kafka Producer эмулятор запущен")
 
 	for i := 0; i < 20; i++ {
 		order := generateOrder()
 
 		err := producer.SendOrder(order)
 		if err != nil {
-			log.Printf("❌ Ошибка отправки заказа %s: %v", order.OrderUID, err)
+			log.Printf("Ошибка отправки заказа %s: %v", order.OrderUID, err)
 		} else {
-			log.Printf("✅ Заказ %s отправлен в Kafka", order.OrderUID)
+			log.Printf("Заказ %s отправлен в Kafka", order.OrderUID)
 		}
 
 		time.Sleep(2 * time.Second)
 	}
 
-	log.Println("🎯 Эмуляция producer завершена")
+	log.Println("Эмуляция producer завершена")
 }
 
 func generateOrder() *model.Order {

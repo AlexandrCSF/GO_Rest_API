@@ -18,11 +18,6 @@ emulator:
 generate-data:
 	go run ./scripts/data_generator.go
 
-.PHONY: init-db
-init-db:
-	chmod +x scripts/init-db.sh
-	./scripts/init-db.sh
-
 .PHONY: migrate
 migrate:
 	psql -h localhost -U postgres -d restapi_dev -f migrations/20241222140000_create_orders.up.sql

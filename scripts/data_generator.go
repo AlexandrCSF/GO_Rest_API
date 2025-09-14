@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -31,18 +32,23 @@ func main() {
 			log.Printf("Ошибка отправки заказа %s: %v", order.OrderUID, err)
 			continue
 		}
-		defer resp.Body.Close()
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+
+			}
+		}(resp.Body)
 
 		if resp.StatusCode == http.StatusCreated {
-			fmt.Printf("✅ Заказ %s успешно создан\n", order.OrderUID)
+			fmt.Printf("Заказ %s успешно создан\n", order.OrderUID)
 		} else {
-			fmt.Printf("❌ Ошибка создания заказа %s: статус %d\n", order.OrderUID, resp.StatusCode)
+			fmt.Printf("Ошибка создания заказа %s: статус %d\n", order.OrderUID, resp.StatusCode)
 		}
 
 		time.Sleep(1 * time.Second)
 	}
 
-	fmt.Println("\n🎯 Генерация данных завершена!")
+	fmt.Println("\nГенерация данных завершена!")
 }
 
 func generateOrders(count int) []*model.Order {
