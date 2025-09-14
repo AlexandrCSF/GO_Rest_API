@@ -5,6 +5,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"log"
 	"wb_cource/internal/app/apiserver"
+	"wb_cource/internal/app/config"
 )
 
 var (
@@ -17,14 +18,14 @@ func init() {
 
 func main() {
 	flag.Parse()
-	config := apiserver.NewConfig()
-	_, err := toml.DecodeFile(configPath, config)
+	cfg := config.NewConfig()
+	_, err := toml.DecodeFile(configPath, cfg)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := apiserver.Start(config); err != nil {
+	if err := apiserver.Start(cfg); err != nil {
 		log.Fatal(err)
 	}
 }
